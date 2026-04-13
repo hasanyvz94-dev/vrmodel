@@ -1,82 +1,52 @@
 <!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Model Viewer | VR & AR</title>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>VR Projem | Kesin Çalışan Kod</title>
+    <meta name="description" content="VR Gözlük Uyumlu Model Görüntüleyici">
     
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    
+    <script src="https://unpkg.com/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
+    
     <style>
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; }
-        
-        /* Modelin Görüneceği Alan */
-        model-viewer {
-            width: 100%;
-            height: 100vh;
-            background-color: #ffffff; /* Modernist ve sade bir arka plan */
-            --poster-color: transparent;
+        /* Yükleme ekranı veya butonlar için özel stil gerekirse buraya eklenebilir */
+        .ar-instructions {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.5); color: white; padding: 10px; border-radius: 5px;
+            font-family: sans-serif; display: none; z-index: 10;
         }
-
-        /* AR Butonu Özelleştirme */
-        #ar-button {
-            background-image: url(https://modelviewer.dev/assets/ic_view_in_ar_new_googblue_48dp.png);
-            background-repeat: no-repeat;
-            background-size: 20px 20px;
-            background-position: 12px 50%;
-            background-color: #fff;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            bottom: 132px;
-            padding: 0px 16px 0px 40px;
-            font-family: Roboto Regular, Helvetica Neue, sans-serif;
-            font-size: 14px;
-            color:#4285f4;
-            height: 36px;
-            line-height: 36px;
-            border-radius: 18px;
-            border: 1px solid #DADCE0;
-        }
-
-        .controls {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        h1 { font-size: 18px; margin: 0; color: #333; }
-        p { font-size: 12px; color: #666; }
     </style>
-</head>
-<body>
+  </head>
+  <body>
 
-    <div class="controls">
-        <h1>3D Galeri</h1>
-        <p>Modeli çevirmek için sürükle, AR için butona tıkla.</p>
-    </div>
+    <a-scene webxr="optionalFeatures: hit-test, local-floor; referenceSpaceType: local-floor">
+      
+      <a-assets>
+        <a-asset-item id="kendiModelim" src="https://cdn.jsdelivr.net/gh/hasanyvz94-dev/dthamlet.github.io@main/model.glb?v=3"></a-asset-item>
+      </a-assets>
 
-    <model-viewer 
-        src="https://cdn.jsdelivr.net/gh/hasanyvz94-dev/dthamlet.github.io@main/model.glb?v=3" 
-        ar 
-        ar-modes="webxr scene-viewer quick-look" 
-        camera-controls 
-        touch-action="none" 
-        shadow-intensity="1" 
-        exposure="1"
-        autoplay
-        xr-environment>
+      <a-light type="ambient" intensity="0.7"></a-light>
+      <a-light type="directional" position="1 2 1" intensity="0.8"></a-light>
+
+      <a-entity 
+        id="modelEntity"
+        gltf-model="#kendiModelim" 
+        position="0 0 -3" 
+        scale="1 1 1"
+        shadow="cast: true; receive: true"
+        animation-mixer> </a-entity>
+
+      <a-entity id="rig" position="0 0 0">
+        <a-entity id="camera" camera look-controls wasd-controls position="0 1.6 0"></a-entity>
         
-        <button slot="ar-button" id="ar-button">
-            Gerçek Dünyaya Yerleştir (AR)
-        </button>
+        <a-entity laser-controls="hand: left"></a-entity>
+        <a-entity laser-controls="hand: right"></a-entity>
+      </a-entity>
 
-    </model-viewer>
+      <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" color="#777" shadow="receive: true"></a-plane>
 
-</body>
+    </a-scene>
+
+  </body>
 </html>
