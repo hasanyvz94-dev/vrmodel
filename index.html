@@ -2,51 +2,58 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>VR Projem | Kesin Çalışan Kod</title>
-    <meta name="description" content="VR Gözlük Uyumlu Model Görüntüleyici">
-    
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    
-    <script src="https://unpkg.com/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
-    
+    <title>Gerçek Dünyada 3D Model | WebXR Passthrough</title>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <style>
-        /* Yükleme ekranı veya butonlar için özel stil gerekirse buraya eklenebilir */
-        .ar-instructions {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.5); color: white; padding: 10px; border-radius: 5px;
-            font-family: sans-serif; display: none; z-index: 10;
-        }
+      body { margin: 0; overflow: hidden; }
+      #ar-instructions {
+        position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+        background: rgba(0,0,0,0.6); color: white; padding: 10px;
+        border-radius: 8px; font-family: sans-serif; pointer-events: none;
+        z-index: 999; text-align: center;
+      }
     </style>
   </head>
   <body>
 
-    <a-scene webxr="optionalFeatures: hit-test, local-floor; referenceSpaceType: local-floor">
+    <div id="ar-instructions">
+      Gözlükte "ENTER AR" butonuna basın.<br>
+      Gerçek dünyayı görmüyorsanız gözlük ayarlarından Passthrough'u açın.
+    </div>
+
+    <a-scene 
+      renderer="alpha: true; antialias: true; colorManagement: true;"
+      webxr="requiredFeatures: local-floor, passthrough; optionalFeatures: hit-test;"
+      background="transparent: true">
       
       <a-assets>
-        <a-asset-item id="kendiModelim" src="https://cdn.jsdelivr.net/gh/hasanyvz94-dev/dthamlet.github.io@main/model.glb?v=3"></a-asset-item>
+        <a-asset-item id="modelim" src="https://cdn.jsdelivr.net/gh/hasanyvz94-dev/dthamlet.github.io@main/model.glb?v=3"></a-asset-item>
       </a-assets>
 
-      <a-light type="ambient" intensity="0.7"></a-light>
-      <a-light type="directional" position="1 2 1" intensity="0.8"></a-light>
+      <a-light type="ambient" intensity="1.5"></a-light>
+      <a-light type="directional" position="1 4 2" intensity="1"></a-light>
 
       <a-entity 
-        id="modelEntity"
-        gltf-model="#kendiModelim" 
-        position="0 0 -3" 
+        id="model-container"
+        gltf-model="#modelim" 
+        position="0 1.2 -2" 
         scale="1 1 1"
-        shadow="cast: true; receive: true"
-        animation-mixer> </a-entity>
-
-      <a-entity id="rig" position="0 0 0">
-        <a-entity id="camera" camera look-controls wasd-controls position="0 1.6 0"></a-entity>
-        
-        <a-entity laser-controls="hand: left"></a-entity>
-        <a-entity laser-controls="hand: right"></a-entity>
+        rotation="0 0 0">
       </a-entity>
 
-      <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" color="#777" shadow="receive: true"></a-plane>
+      <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
 
     </a-scene>
 
+    <script>
+      // Gözlük AR moduna girdiğinde arka planı tamamen şeffaf yapar
+      const sceneEl = document.querySelector('a-scene');
+      sceneEl.addEventListener('enter-vr', function () {
+        if (sceneEl.is('ar-mode')) {
+          console.log("AR/Passthrough Moduna Girildi");
+          document.getElementById('ar-instructions').style.display = 'none';
+        }
+      });
+    </script>
   </body>
 </html>
