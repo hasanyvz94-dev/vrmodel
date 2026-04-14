@@ -2,21 +2,39 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>VR Projem | Model Odaklı</title>
-    <meta name="description" content="VR Gözlük Uyumlu Model Görüntüleyici">
+    <title>VR Projem | Ultra HD Model Görüntüleyici</title>
+    <meta name="description" content="VR Gözlük Uyumlu Max Çözünürlük">
     
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
     
     <script>
-      // Modeli iç koordinatlarından bağımsız olarak 0,0,0 noktasına merkezleyen bileşen
+      // Doku kalitesini (Anisotropy) artıran bileşen
+      AFRAME.registerComponent('high-quality-textures', {
+        init: function () {
+          this.el.addEventListener('model-loaded', () => {
+            const mesh = this.el.getObject3D('mesh');
+            if (mesh) {
+              const renderer = this.el.sceneEl.renderer;
+              mesh.traverse(node => {
+                if (node.isMesh && node.material && node.material.map) {
+                  // Dokuyu en keskin hale getirir (Bulanıklığı önler)
+                  node.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                  node.material.map.needsUpdate = true;
+                }
+              });
+            }
+          });
+        }
+      });
+
+      // Modeli merkezleyen bileşen (Olduğu gibi korundu)
       AFRAME.registerComponent('auto-center', {
         init: function () {
           this.el.addEventListener('model-loaded', () => {
             const box = new THREE.Box3().setFromObject(this.el.object3D);
             const center = new THREE.Vector3();
             box.getCenter(center);
-            // Modelin merkezini 0,0,0 noktasına kaydırır
             this.el.object3D.position.x -= center.x;
             this.el.object3D.position.y -= center.y;
             this.el.object3D.position.z -= center.z;
@@ -26,15 +44,11 @@
 
       // Mouse hareket mantığı (Olduğu gibi korundu)
       AFRAME.registerComponent('mouse-move-logic', {
-        schema: {
-          speed: { type: 'number', default: 0.01 }
-        },
+        schema: { speed: { type: 'number', default: 0.02 } },
         init: function () {
           this.cameraEl = document.querySelector('#camera');
           this.isLocked = false;
-          document.addEventListener('click', () => {
-            document.body.requestPointerLock();
-          });
+          document.addEventListener('click', () => { document.body.requestPointerLock(); });
           document.addEventListener('pointerlockchange', () => {
             this.isLocked = document.pointerLockElement === document.body;
           });
@@ -48,10 +62,8 @@
           let cameraRotation = this.cameraEl.object3D.quaternion;
           let forward = new THREE.Vector3(0, 0, -1).applyQuaternion(cameraRotation);
           let right = new THREE.Vector3(1, 0, 0).applyQuaternion(cameraRotation);
-          forward.y = 0;
-          right.y = 0;
-          forward.normalize();
-          right.normalize();
+          forward.y = 0; right.y = 0;
+          forward.normalize(); right.normalize();
           let moveX = right.multiplyScalar(mouseX * this.data.speed);
           let moveZ = forward.multiplyScalar(mouseZ * this.data.speed);
           this.el.object3D.position.add(moveX);
@@ -70,14 +82,22 @@
   </head>
   <body>
 
-    <a-scene webxr="optionalFeatures: hit-test, local-floor; referenceSpaceType: local-floor">
+    <a-scene 
+      renderer="antialias: true; 
+                colorManagement: true; 
+                sortObjects: true; 
+                physicallyCorrectLights: true; 
+                maxCanvasWidth: 3840; 
+                maxCanvasHeight: 2160; 
+                precision: high;"
+      webxr="optionalFeatures: hit-test, local-floor; referenceSpaceType: local-floor">
       
       <a-assets>
         <a-asset-item id="kendiModelim" src="https://cdn.jsdelivr.net/gh/hasanyvz94-dev/dthamlet.github.io@main/model.glb?v=3"></a-asset-item>
       </a-assets>
 
-      <a-light type="ambient" intensity="0.7"></a-light>
-      <a-light type="directional" position="1 2 1" intensity="0.8"></a-light>
+      <a-light type="ambient" intensity="0.8"></a-light>
+      <a-light type="directional" position="1 2 1" intensity="1"></a-light>
 
       <a-entity 
         id="modelEntity"
@@ -85,16 +105,18 @@
         position="0 0 0" 
         scale="1 1 1"
         auto-center
+        high-quality-textures
         shadow="cast: true; receive: true"
-        animation-mixer> </a-entity>
+        animation-mixer> 
+      </a-entity>
 
       <a-entity id="rig" position="0 0 4" mouse-move-logic="speed: 0.02">
-        <a-entity id="camera" camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+        <a-entity id="camera" camera="far: 1000; near: 0.01;" look-controls wasd-controls position="0 1.6 0"></a-entity>
         <a-entity laser-controls="hand: left"></a-entity>
         <a-entity laser-controls="hand: right"></a-entity>
       </a-entity>
 
-      </a-scene>
+    </a-scene>
 
   </body>
 </html>
