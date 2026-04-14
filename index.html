@@ -1,49 +1,53 @@
+
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Gerçek Dünyada VR Deneyimi</title>
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <title>VR Projem | Kesin Çalışan Kod</title>
+    <meta name="description" content="VR Gözlük Uyumlu Model Görüntüleyici">
+    
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    
+    <script src="https://unpkg.com/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
+    
     <style>
-      /* Sitenin arka planını şeffaf yapıyoruz ki kameralar görünebilsin */
-      body { background-color: rgba(0, 0, 0, 0); margin: 0; overflow: hidden; }
+        /* Yükleme ekranı veya butonlar için özel stil gerekirse buraya eklenebilir */
+        .ar-instructions {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.5); color: white; padding: 10px; border-radius: 5px;
+            font-family: sans-serif; display: none; z-index: 10;
+        }
     </style>
   </head>
   <body>
 
-    <a-scene 
-      webxr="requiredFeatures: passthrough, local-floor;" 
-      renderer="alpha: true; colorManagement: true;"
-      id="sahne">
+    <a-scene webxr="optionalFeatures: hit-test, local-floor; referenceSpaceType: local-floor">
       
       <a-assets>
-        <a-asset-item id="modelim" src="https://cdn.jsdelivr.net/gh/hasanyvz94-dev/dthamlet.github.io@main/model.glb?v=3"></a-asset-item>
+        <a-asset-item id="kendiModelim" src="https://cdn.jsdelivr.net/gh/hasanyvz94-dev/dthamlet.github.io@main/model.glb?v=3"></a-asset-item>
       </a-assets>
 
-      <a-light type="ambient" intensity="1"></a-light>
-      <a-light type="directional" position="1 2 1" intensity="1.5"></a-light>
+      <a-light type="ambient" intensity="0.7"></a-light>
+      <a-light type="directional" position="1 2 1" intensity="0.8"></a-light>
 
       <a-entity 
-        gltf-model="#modelim" 
-        position="0 1.2 -2" 
+        id="modelEntity"
+        gltf-model="#kendiModelim" 
+        position="0 0 -3" 
         scale="1 1 1"
-        id="ana-model">
+        shadow="cast: true; receive: true"
+        animation-mixer> </a-entity>
+
+      <a-entity id="rig" position="0 0 0">
+        <a-entity id="camera" camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+        
+        <a-entity laser-controls="hand: left"></a-entity>
+        <a-entity laser-controls="hand: right"></a-entity>
       </a-entity>
 
-      <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+      <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" color="#777" shadow="receive: true"></a-plane>
 
     </a-scene>
 
-    <script>
-      const sceneEl = document.querySelector('a-scene');
-
-      // VR moduna girildiğinde arka planın şeffaf kalmasını sağlayan sistem
-      sceneEl.addEventListener('enter-vr', function () {
-        // VR modundayken passthrough'u zorla aktif et
-        if (sceneEl.is('vr-mode')) {
-          sceneEl.setAttribute('background', 'transparent', true);
-        }
-      });
-    </script>
   </body>
 </html>
